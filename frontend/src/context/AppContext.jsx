@@ -10,7 +10,7 @@ const STORAGE_KEYS = {
   SESSION_ID: 'chromabiz_session_id'
 };
 
-export const AppProvider = ({ children }) => {
+export function AppProvider({ children }) {
   const [palettes, setPalettes] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [businessInfo, setBusinessInfo] = useState(null);
@@ -24,7 +24,6 @@ export const AppProvider = ({ children }) => {
   });
   const [sessionId, setSessionId] = useState('');
 
-  // Initialize from localStorage
   useEffect(() => {
     const storedPalettes = localStorage.getItem(STORAGE_KEYS.PALETTES);
     const storedFavorites = localStorage.getItem(STORAGE_KEYS.FAVORITES);
@@ -35,7 +34,6 @@ export const AppProvider = ({ children }) => {
     if (storedPalettes) {
       try {
         const parsed = JSON.parse(storedPalettes);
-        // Check if data is less than 24 hours old
         if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
           setPalettes(parsed.data || []);
         }
@@ -75,7 +73,6 @@ export const AppProvider = ({ children }) => {
     setSessionId(storedSessionId);
   }, []);
 
-  // Save palettes to localStorage
   useEffect(() => {
     if (palettes.length > 0) {
       localStorage.setItem(STORAGE_KEYS.PALETTES, JSON.stringify({
@@ -85,19 +82,16 @@ export const AppProvider = ({ children }) => {
     }
   }, [palettes]);
 
-  // Save favorites to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
   }, [favorites]);
 
-  // Save business info to localStorage
   useEffect(() => {
     if (businessInfo) {
       localStorage.setItem(STORAGE_KEYS.BUSINESS_INFO, JSON.stringify(businessInfo));
     }
   }, [businessInfo]);
 
-  // Save chat history to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(chatHistory));
   }, [chatHistory]);
@@ -156,12 +150,12 @@ export const AppProvider = ({ children }) => {
       {children}
     </AppContext.Provider>
   );
-};
+}
 
-export const useAppContext = () => {
+export function useAppContext() {
   const context = useContext(AppContext);
   if (!context) {
     throw new Error('useAppContext must be used within AppProvider');
   }
   return context;
-};
+}
