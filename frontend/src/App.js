@@ -783,7 +783,7 @@ function MainContent() {
         <ChatPanel />
       </aside>
 
-      <div className="lg:hidden fixed bottom-6 right-6 z-50">
+      <div className="lg:hidden fixed bottom-6 right-6 z-[9999]">
         <Sheet>
           <SheetTrigger asChild>
             <Button size="lg" className="rounded-full shadow-lg h-14 w-14 p-0" data-testid="mobile-chat-button">
