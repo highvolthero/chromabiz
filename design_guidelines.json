@@ -1,0 +1,148 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "ChromaBiz AI",
+      "tone": "Objective, Professional, Artful",
+      "aesthetic": "Swiss Style / Neo-Brutalist Minimal",
+      "principles": [
+        "Content is King: The generated colors are the heroes. UI recedes.",
+        "Bold Typography: Headings carry the 'Creative' weight.",
+        "Strict Grid: Everything aligns perfectly.",
+        "Neutral Canvas: No interface colors that clash with palettes."
+      ]
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Syne, sans-serif",
+        "body": "Manrope, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "imports": [
+        "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400&display=swap');"
+      ],
+      "scale": {
+        "h1": "text-4xl md:text-6xl font-bold tracking-tight font-heading",
+        "h2": "text-3xl md:text-4xl font-bold tracking-tight font-heading",
+        "h3": "text-xl md:text-2xl font-semibold font-heading",
+        "body": "text-base leading-relaxed font-body",
+        "small": "text-sm font-medium text-muted-foreground font-body",
+        "label": "text-xs uppercase tracking-widest font-bold text-muted-foreground font-body"
+      }
+    },
+    "colors": {
+      "palette": {
+        "background": "#FFFFFF",
+        "foreground": "#18181B",
+        "card": "#FFFFFF",
+        "card_foreground": "#18181B",
+        "popover": "#FFFFFF",
+        "popover_foreground": "#18181B",
+        "primary": "#18181B",
+        "primary_foreground": "#FAFAFA",
+        "secondary": "#F4F4F5",
+        "secondary_foreground": "#18181B",
+        "muted": "#F4F4F5",
+        "muted_foreground": "#71717A",
+        "accent": "#F4F4F5",
+        "accent_foreground": "#18181B",
+        "destructive": "#EF4444",
+        "destructive_foreground": "#FAFAFA",
+        "border": "#E4E4E7",
+        "input": "#E4E4E7",
+        "ring": "#18181B"
+      },
+      "usage_rules": [
+        "Interface must remain strictly monochrome (Zinc scale).",
+        "The ONLY color allowed is the 'Generate' button (Black #18181B) and the generated palettes themselves.",
+        "Do not use shadows for depth; use borders (1px solid #E4E4E7)."
+      ]
+    },
+    "layout": {
+      "structure": {
+        "desktop": "grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden",
+        "mobile": "flex flex-col min-h-screen"
+      },
+      "sections": {
+        "main_canvas": "lg:col-span-8 xl:col-span-9 h-full overflow-y-auto p-6 md:p-12 bg-background",
+        "chat_panel": "lg:col-span-4 xl:col-span-3 h-full border-l border-border bg-background/50 backdrop-blur-xl p-6 flex flex-col"
+      },
+      "spacing": {
+        "container_padding": "p-6 md:p-12",
+        "element_gap": "gap-6",
+        "section_gap": "gap-12"
+      }
+    },
+    "components": {
+      "PaletteCard": {
+        "path": "/app/frontend/src/components/custom/PaletteCard.jsx",
+        "description": "A card displaying a generated color palette.",
+        "styling": "group relative overflow-hidden rounded-xl border border-border bg-card transition-all hover:shadow-lg",
+        "structure": [
+          "ColorStrip: Flex container of 5-6 colors. Height: h-32.",
+          "InfoSection: p-4 flex justify-between items-center.",
+          "Actions: Copy Hex, Save to Favorites (Star icon)."
+        ]
+      },
+      "InputForm": {
+        "path": "/app/frontend/src/components/custom/InputForm.jsx",
+        "description": "The main user input form for generating palettes.",
+        "styling": "grid grid-cols-1 md:grid-cols-2 gap-6 mb-12",
+        "elements": [
+          "Business Name (Input)",
+          "Category (Select)",
+          "Target Country (Select)",
+          "Brand Values (Multi-select/Tags)"
+        ]
+      },
+      "ChatPanel": {
+        "path": "/app/frontend/src/components/custom/ChatPanel.jsx",
+        "description": "AI Assistant for refining palettes.",
+        "styling": "flex flex-col h-full",
+        "elements": [
+          "Header: 'AI Design Assistant'",
+          "MessageList: ScrollArea flex-1 p-4 space-y-4",
+          "InputArea: Fixed at bottom, p-4 border-t"
+        ]
+      }
+    },
+    "visual_enhancers": {
+      "empty_state": {
+        "image_url": "https://images.unsplash.com/photo-1769541607705-3b3c5095679b?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "description": "Abstract white geometric low poly background for empty states.",
+        "styling": "opacity-50 grayscale mix-blend-multiply"
+      },
+      "loading_state": {
+        "type": "skeleton",
+        "animation": "pulse",
+        "styling": "bg-muted rounded-xl"
+      }
+    },
+    "motion": {
+      "transitions": "transition-all duration-300 ease-out",
+      "hover_effects": "hover:-translate-y-1 hover:shadow-md",
+      "entrance": "animate-in fade-in slide-in-from-bottom-4 duration-500"
+    },
+    "accessibility": {
+      "contrast": "Ensure text on generated colors dynamically switches between black/white based on luminance.",
+      "focus_states": "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "aria_labels": "All color swatches must have aria-label='Color [Hex Code]'"
+    },
+    "instructions_to_main_agent": [
+      "1. SETUP: Install 'lucide-react' for icons.",
+      "2. FONTS: Add the Google Fonts import to index.css immediately.",
+      "3. THEME: Force Light Mode in tailwind.config.js (remove dark mode class strategy or set default to light).",
+      "4. LAYOUT: Implement the 70/30 split strictly. On mobile, the Chat Panel should be a 'Sheet' or 'Drawer' triggered by a floating button.",
+      "5. STATE: Use a global state (Context or Zustand) for 'generatedPalettes' so the Chatbot can access them.",
+      "6. MOCK DATA: Create a robust mock function for palette generation until the backend is ready.",
+      "7. CRITICAL: The interface must be boring. The palettes must be the only source of color."
+    ],
+    "universal_guidelines": [
+      "Do not use gradients for UI elements.",
+      "Use 'Syne' font for all Headings (h1-h3).",
+      "Use 'Manrope' for all body text.",
+      "All interactive elements must have data-testid attributes.",
+      "Use Sonner for toast notifications.",
+      "Never use 'alert()' or native confirm dialogs."
+    ]
+  }
+}
