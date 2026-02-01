@@ -315,18 +315,50 @@ function InputForm({ onSuccess }) {
   );
 }
 
+// Helper function to copy text to clipboard with fallback
+const copyToClipboard = async (text) => {
+  // Try modern clipboard API first
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.warn('Clipboard API failed, trying fallback');
+    }
+  }
+  
+  // Fallback for older browsers or non-secure contexts
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+    textArea.remove();
+    return true;
+  } catch (err) {
+    textArea.remove();
+    return false;
+  }
+};
+
 // Color Swatch Component
 function ColorSwatch({ color, colorIndex }) {
   const [copied, setCopied] = useState(false);
   const textColor = getContrastColor(color.hex);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(color.hex);
+    const success = await copyToClipboard(color.hex);
+    if (success) {
       setCopied(true);
       toast.success(`Copied ${color.hex}`);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } else {
       toast.error('Failed to copy');
     }
   };
