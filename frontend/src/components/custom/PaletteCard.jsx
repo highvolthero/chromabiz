@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
-import { Copy, Check, Star, Download, Code, FileJson, Image } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../ui/tooltip';
+import { Copy, Check, Star, Download, Code, FileJson, ImageIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-// Helper function to determine text color based on background
 const getContrastColor = (hexColor) => {
   const hex = hexColor.replace('#', '');
   const r = parseInt(hex.substr(0, 2), 16);
@@ -26,22 +19,16 @@ const getContrastColor = (hexColor) => {
   return luminance > 0.5 ? '#000000' : '#FFFFFF';
 };
 
-// Helper to convert hex to RGB
 const hexToRgb = (hex) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (result) {
-    return {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    };
+    return `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})`;
   }
-  return { r: 0, g: 0, b: 0 };
+  return 'rgb(0, 0, 0)';
 };
 
-const ColorSwatch = ({ color, index }) => {
+const ColorSwatch = ({ color, colorIndex }) => {
   const [copied, setCopied] = useState(false);
-  const rgb = hexToRgb(color.hex);
   const textColor = getContrastColor(color.hex);
 
   const handleCopy = async () => {
@@ -56,40 +43,26 @@ const ColorSwatch = ({ color, index }) => {
   };
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={handleCopy}
-            className="flex-1 h-32 relative group cursor-pointer transition-all duration-300 hover:flex-[1.5] first:rounded-l-lg last:rounded-r-lg overflow-hidden"
-            style={{ backgroundColor: color.hex }}
-            aria-label={`Color ${color.hex}`}
-            data-testid={`color-swatch-${index}`}
-          >
-            <div 
-              className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ color: textColor }}
-            >
-              {copied ? (
-                <Check className="w-5 h-5 mb-1" />
-              ) : (
-                <Copy className="w-5 h-5 mb-1" />
-              )}
-              <span className="font-mono text-xs font-bold">{color.hex}</span>
-              <span className="text-xs mt-1 px-2 text-center">{color.name}</span>
-            </div>
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-xs">
-          <div className="space-y-1">
-            <p className="font-bold">{color.name}</p>
-            <p className="font-mono text-sm">{color.hex}</p>
-            <p className="font-mono text-sm">rgb({rgb.r}, {rgb.g}, {rgb.b})</p>
-            <p className="text-muted-foreground text-xs">{color.usage}</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <button
+      onClick={handleCopy}
+      className="flex-1 h-32 relative group cursor-pointer transition-all duration-300 hover:flex-[1.5] first:rounded-l-lg last:rounded-r-lg overflow-hidden"
+      style={{ backgroundColor: color.hex }}
+      aria-label={`Color ${color.hex}`}
+      data-testid={`color-swatch-${colorIndex}`}
+    >
+      <div 
+        className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        style={{ color: textColor }}
+      >
+        {copied ? (
+          <Check className="w-5 h-5 mb-1" />
+        ) : (
+          <Copy className="w-5 h-5 mb-1" />
+        )}
+        <span className="font-mono text-xs font-bold">{color.hex}</span>
+        <span className="text-xs mt-1 px-2 text-center truncate max-w-full">{color.name}</span>
+      </div>
+    </button>
   );
 };
 
@@ -99,7 +72,7 @@ export const PaletteCard = ({ palette, index }) => {
 
   const handleExportCSS = () => {
     const cssVars = palette.colors
-      .map((c, i) => `  --color-${c.usage.toLowerCase().replace(/\s+/g, '-')}: ${c.hex};`)
+      .map((c) => `  --color-${c.usage.toLowerCase().replace(/\s+/g, '-')}: ${c.hex};`)
       .join('\n');
     const css = `:root {\n${cssVars}\n}`;
     
@@ -114,7 +87,6 @@ export const PaletteCard = ({ palette, index }) => {
   };
 
   const handleDownloadPNG = async () => {
-    // Create a canvas to render the palette
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const colorWidth = 200;
@@ -122,27 +94,23 @@ export const PaletteCard = ({ palette, index }) => {
     canvas.width = colorWidth * palette.colors.length;
     canvas.height = height;
 
-    // Draw colors
     palette.colors.forEach((color, i) => {
       ctx.fillStyle = color.hex;
       ctx.fillRect(i * colorWidth, 0, colorWidth, height - 50);
       
-      // Add hex text
       ctx.fillStyle = getContrastColor(color.hex);
-      ctx.font = 'bold 16px JetBrains Mono, monospace';
+      ctx.font = 'bold 16px monospace';
       ctx.textAlign = 'center';
       ctx.fillText(color.hex, i * colorWidth + colorWidth / 2, height - 80);
     });
 
-    // Add palette name at bottom
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, height - 50, canvas.width, 50);
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 20px Syne, sans-serif';
+    ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(palette.name, 20, height - 18);
 
-    // Download
     const link = document.createElement('a');
     link.download = `${palette.name.toLowerCase().replace(/\s+/g, '-')}-palette.png`;
     link.href = canvas.toDataURL('image/png');
@@ -157,14 +125,12 @@ export const PaletteCard = ({ palette, index }) => {
       style={{ animationDelay: `${index * 100}ms` }}
       data-testid={`palette-card-${index}`}
     >
-      {/* Color Strip */}
       <div className="flex h-32">
         {palette.colors.map((color, i) => (
-          <ColorSwatch key={i} color={color} index={i} />
+          <ColorSwatch key={`${palette.id}-color-${i}`} color={color} colorIndex={i} />
         ))}
       </div>
 
-      {/* Info Section */}
       <div className="p-4 border-t border-border">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -176,9 +142,7 @@ export const PaletteCard = ({ palette, index }) => {
             </p>
           </div>
           
-          {/* Actions */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Favorite Button */}
             <Button
               variant="ghost"
               size="icon"
@@ -190,7 +154,6 @@ export const PaletteCard = ({ palette, index }) => {
               <Star className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
             </Button>
 
-            {/* Export Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" data-testid={`export-button-${index}`}>
@@ -200,7 +163,7 @@ export const PaletteCard = ({ palette, index }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleDownloadPNG} data-testid={`export-png-${index}`}>
-                  <Image className="w-4 h-4 mr-2" />
+                  <ImageIcon className="w-4 h-4 mr-2" />
                   Download PNG
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleExportCSS} data-testid={`export-css-${index}`}>
@@ -216,7 +179,6 @@ export const PaletteCard = ({ palette, index }) => {
           </div>
         </div>
 
-        {/* Psychology */}
         {palette.psychology && (
           <div className="mt-3 pt-3 border-t border-border">
             <p className="text-xs uppercase tracking-widest font-bold text-muted-foreground mb-1">
@@ -228,12 +190,11 @@ export const PaletteCard = ({ palette, index }) => {
           </div>
         )}
 
-        {/* Color Details */}
         <div className="mt-3 pt-3 border-t border-border">
           <div className="flex flex-wrap gap-2">
             {palette.colors.map((color, i) => (
               <div 
-                key={i}
+                key={`${palette.id}-detail-${i}`}
                 className="flex items-center gap-1.5 text-xs"
               >
                 <div 
