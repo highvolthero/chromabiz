@@ -7,7 +7,7 @@ Build a web application that uses Google Gemini AI to generate business-specific
 - **Frontend**: React 19 with TailwindCSS, Shadcn/UI components
 - **Backend**: FastAPI with Python
 - **Database**: MongoDB (for status checks)
-- **AI**: Google Gemini 3 Flash via emergentintegrations library
+- **AI**: Google Gemini 3 Flash
 
 ## User Personas
 1. **Business Owners** - Need brand colors for new businesses

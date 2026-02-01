@@ -1,3 +1,4 @@
+import google.generativeai as genai
 from fastapi import FastAPI, APIRouter, Request, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -9,7 +10,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone, timedelta
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+
 import json
 import re
 
@@ -270,10 +271,6 @@ async def generate_palettes(request: Request, data: PaletteGenerationRequest):
             detail="Daily generation limit reached. Please try again tomorrow."
         )
     
-    api_key = os.environ.get('EMERGENT_LLM_KEY')
-    if not api_key:
-        raise HTTPException(status_code=500, detail="API key not configured")
-    
     # Build the prompt
     age_groups_str = ", ".join(data.age_groups)
     prompt = f"""Generate 5 professional color palettes for a {data.business_name} business in the {data.business_category} industry.
@@ -307,30 +304,28 @@ Return ONLY a JSON array with this exact structure (no other text):
   }}
 ]"""
 
+    # Use Google Gemini API for palette generation
+    gemini_api_key = os.environ.get('GOOGLE_GEMINI_API_KEY')
+    if not gemini_api_key:
+        logger.error('GOOGLE_GEMINI_API_KEY not set')
+        raise HTTPException(status_code=500, detail='Google Gemini API key not configured')
+
+    genai.configure(api_key=gemini_api_key)
+    model = genai.GenerativeModel('gemini-pro')
     try:
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=f"palette-gen-{uuid.uuid4()}",
-            system_message="You are an expert color consultant and brand designer. Always respond with valid JSON only."
-        ).with_model("gemini", "gemini-3-flash-preview")
-        
-        user_message = UserMessage(text=prompt)
-        response = await chat.send_message(user_message)
-        
-        palettes = parse_palette_response(response)
-        
+        response = model.generate_content(prompt)
+        if hasattr(response, 'text'):
+            palettes = parse_palette_response(response.text)
+        else:
+            palettes = []
         if not palettes:
-            # Generate fallback palettes
             palettes = generate_fallback_palettes(data.business_category)
-        
         return PaletteGenerationResponse(
             palettes=palettes,
             remaining_generations=remaining
         )
-        
     except Exception as e:
-        logger.error(f"Error generating palettes: {e}")
-        # Return fallback palettes on error
+        logger.error(f"Error generating palettes with Gemini: {e}")
         palettes = generate_fallback_palettes(data.business_category)
         return PaletteGenerationResponse(
             palettes=palettes,
@@ -450,9 +445,10 @@ async def chat_with_ai(request: Request, data: ChatRequest):
             detail="Daily revision limit reached. Please try again tomorrow."
         )
     
-    api_key = os.environ.get('EMERGENT_LLM_KEY')
-    if not api_key:
-        raise HTTPException(status_code=500, detail="API key not configured")
+    gemini_api_key = os.environ.get('GOOGLE_GEMINI_API_KEY')
+    if not gemini_api_key:
+        logger.error('GOOGLE_GEMINI_API_KEY not set')
+        raise HTTPException(status_code=500, detail='Google Gemini API key not configured')
     
     # Build context for AI
     palettes_context = json.dumps(data.context.get("palettes", []), indent=2)
@@ -471,17 +467,17 @@ Current Palettes:
 Provide helpful, concise advice about color choices, psychology, and brand alignment. When suggesting color changes, always include specific hex codes. Format color suggestions clearly."""
 
     try:
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=data.session_id,
-            system_message=system_message
-        ).with_model("gemini", "gemini-3-flash-preview")
+        genai.configure(api_key=gemini_api_key)
+        model = genai.GenerativeModel('gemini-pro', system_instruction=system_message)
+        response = model.generate_content(data.message)
         
-        user_message = UserMessage(text=data.message)
-        response = await chat.send_message(user_message)
+        if hasattr(response, 'text'):
+            ai_response = response.text
+        else:
+            ai_response = "Unable to generate response"
         
         return ChatResponse(
-            response=response,
+            response=ai_response,
             remaining_revisions=remaining
         )
         

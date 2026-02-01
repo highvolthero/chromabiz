@@ -10,7 +10,7 @@
     "ui_bugs": [
       {
         "component": "Mobile Chat Button",
-        "issue": "Click intercepted by emergent-badge overlay on mobile",
+        "issue": "Click intercepted by overlay on mobile",
         "selector": "[data-testid='mobile-chat-button']",
         "fix_priority": "LOW"
       }
@@ -40,7 +40,7 @@
   
   "test_report_links": ["/app/backend_test.py"],
   
-  "action_item_for_main_agent": "Minor fix needed: Remove or adjust emergent-badge overlay that intercepts mobile chat button clicks. All other functionality is working correctly.",
+  "action_item_for_main_agent": "Minor fix needed: Remove or adjust overlay that intercepts mobile chat button clicks. All other functionality is working correctly.",
   
   "updated_files": ["/app/backend_test.py"],
   

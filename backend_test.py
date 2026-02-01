@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class ChromaBizAPITester:
-    def __init__(self, base_url="https://palette-maker-15.preview.emergentagent.com"):
+    def __init__(self, base_url="http://localhost:8000"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
